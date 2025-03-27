@@ -4,6 +4,7 @@ const bodyParser = require('body-parser');
 const cors = require('cors');
 const connectDB = require('./db');
 const List = require('./models/DeployHook');
+const Histotry = require('./models/deployHistory');
 require('./deploy-cron');
 
 const app = express();
@@ -48,11 +49,37 @@ app.get('/getAll', async (req, res) => {
     }
 });
 
+app.get('/getAllHistory', async (req, res) => {
+    try {
+        const items = await Histotry.find();
+      
+        res.send(items);
+    } catch (error) {
+        res.status(500).send({ error: 'Server error' });
+    }
+});
+
 
 
 app.get('/getById/:id', async (req, res) => {
     try {
         const item = await List.findById(req.params.id);
+        if (!item) {
+            return res.status(404).send({ error: 'Item not found' });
+        }
+        res.send(item);
+    } catch (error) {
+        res.status(500).send({ error: 'Server error' });
+    }
+});
+
+
+
+app.get('/getByIdByHistory/:id', async (req, res) => {
+
+    const id = req.params.id;
+    try {
+        const item = await Histotry.find({ id: id});
         if (!item) {
             return res.status(404).send({ error: 'Item not found' });
         }
